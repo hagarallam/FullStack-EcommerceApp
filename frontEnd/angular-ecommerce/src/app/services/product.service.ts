@@ -9,6 +9,7 @@ import { ProductCategory } from '../common/product-category';
 })
 export class ProductService {
 
+
   private baseUrl = 'http://localhost:8080/api/products';
   private categoryUrl = 'http://localhost:8080/api/product-category';
 
@@ -21,6 +22,12 @@ export class ProductService {
 
     return this.getProductsFromServer(searchUrl);
 
+  }
+
+
+  getProduct(productId: number) : Observable<Product>{
+    const searchUrl = `${this.baseUrl}/${productId}`
+    return this.httpClient.get<Product>(searchUrl);
   }
 
   searchProducts(keyword: string) {
