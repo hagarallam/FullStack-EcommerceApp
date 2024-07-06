@@ -17,8 +17,11 @@ export class ProductListComponent implements OnInit {
   searchMode: boolean = false;
 
   pageNumber: number = 1;
-  pageSize: number = 10;
+  pageSize: number = 5;
   totalElements: number = 0;
+
+
+  previousKeyword: string = "";
 
   constructor(private productService: ProductService, private route: ActivatedRoute) { }
 
@@ -41,11 +44,30 @@ export class ProductListComponent implements OnInit {
   }
   handleSearchProducts() {
     const keyword = this.route.snapshot.paramMap.get('keyword')!;
-    this.productService.searchProducts(keyword).subscribe(
-      data => {
-        this.products = data;
-      }
-    );
+
+
+    if (this.previousKeyword != keyword) {
+      this.pageNumber = 1;
+    }
+
+    this.previousKeyword = keyword;
+
+    this.productService.searchProductPaginate(this.pageNumber - 1,
+      this.pageSize,
+      keyword
+    )
+      .subscribe(
+        this.processResult()
+      );
+  }
+
+  processResult() {
+    return (data: any) => {
+      this.products = data._embedded.products;
+      this.pageNumber = data.page.number + 1;
+      this.pageSize = data.page.size;
+      this.totalElements = data.page.totalElements;
+    };
   }
 
   handleListProducts() {
@@ -68,13 +90,13 @@ export class ProductListComponent implements OnInit {
     this.productService.getProductListPaginate(this.pageNumber - 1,
       this.pageSize,
       this.currentCategoryId
-    ).subscribe(
-      data => {
-        this.products = data._embedded.products;
-        this.pageNumber = data.page.number + 1;
-        this.pageSize = data.page.size;
-        this.totalElements = data.page.totalElements;
-      }
-    )
+    ).subscribe(this.processResult());
+  }
+
+
+  updatePageSize(pageSize: string) {
+    this.pageSize = +pageSize;
+    this.pageNumber = 1;
+    this.listProducts();
   }
 }
