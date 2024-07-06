@@ -10,21 +10,44 @@ import { ProductService } from 'src/app/services/product.service';
 })
 export class ProductListComponent implements OnInit {
 
-  products : Product[] =[] ;
-  currentCategoryId : number =1  ;
-  currentCategoryName : string = "Books"
-  constructor(private productService : ProductService,private route:ActivatedRoute) { }
+  products: Product[] = [];
+  currentCategoryId: number = 1;
+  currentCategoryName: string = "Books"
+  searchMode: boolean = false;
+
+
+  constructor(private productService: ProductService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(()=> {
+    this.route.paramMap.subscribe(() => {
       this.listProducts();
     })
   }
 
-  listProducts(){
-    const hasCategoryId : boolean = this.route.snapshot.paramMap.has('id');
+  listProducts() {
 
-    if(hasCategoryId){
+    this.searchMode = this.route.snapshot.paramMap.has('keyword');
+    if (this.searchMode) {
+      this.handleSearchProducts();
+    }
+    else {
+      this.handleListProducts();
+    }
+
+  }
+  handleSearchProducts() {
+    const keyword = this.route.snapshot.paramMap.get('keyword')!;
+    this.productService.searchProducts(keyword).subscribe(
+      data =>{
+        this.products=data;
+      }
+    );
+  }
+
+  handleListProducts() {
+    const hasCategoryId: boolean = this.route.snapshot.paramMap.has('id');
+
+    if (hasCategoryId) {
       this.currentCategoryId = +this.route.snapshot.paramMap.get('id')!;
       this.currentCategoryName = this.route.snapshot.paramMap.get('name')!;
     }
@@ -35,5 +58,4 @@ export class ProductListComponent implements OnInit {
       }
     )
   }
-
 }
