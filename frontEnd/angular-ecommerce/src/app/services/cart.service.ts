@@ -16,40 +16,54 @@ export class CartService {
 
 
   addToCart(cartItem: CartItem) {
-    // check if we have item 
-    let isItemExists: boolean = false;
-    let existingCartItem !: CartItem; 
 
-    if (this.cartItems.length > 0) {
-
-      existingCartItem != this.cartItems.find(currentItem => currentItem.id == cartItem.id);
-
-      isItemExists = (existingCartItem != undefined);
-    }
-
-    if (isItemExists) {
+    let existingCartItem = this.cartItems.find(currentItem => currentItem.id == cartItem.id);
+    if (existingCartItem) {
       existingCartItem.quantity++;
-
     }
     else {
       this.cartItems.push(cartItem);
     }
-
 
     //compute cart total price and quantity 
     this.computeCartTotals();
 
   }
   computeCartTotals() {
-    let totalPriceValue :number = 0 ;
-    let totalQuantityValue : number = 0 ;
+    let totalPriceValue: number = 0;
+    let totalQuantityValue: number = 0;
 
-    for(let item of this.cartItems){
-      totalPriceValue+= item.unitPrice * item.quantity; 
+    for (let item of this.cartItems) {
+      totalPriceValue += item.unitPrice * item.quantity;
       totalQuantityValue += item.quantity;
     }
 
     this.totalPrice.next(totalPriceValue);
     this.totalQuantity.next(totalQuantityValue);
+  }
+
+  decrementQuantity(cartItem: CartItem) {
+
+    cartItem.quantity--;
+
+    if(cartItem.quantity === 0){
+      this.remove(cartItem);
+    }
+    else{
+      this.computeCartTotals();
+    }
+    
+  }
+  remove(cartItem: CartItem) {
+
+    // get index of the item 
+
+    let index = this.cartItems.findIndex(item => item.id === cartItem.id);
+    // if found remove it from arrey
+
+    if(index>-1){
+      this.cartItems.splice(index,1);
+      this.computeCartTotals();
+    }
   }
 }
