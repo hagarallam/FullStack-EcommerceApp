@@ -8,21 +8,61 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 })
 export class CheckoutComponent implements OnInit {
 
-  checkoutFormGroup !: FormGroup ;
-  constructor(private formBuilder : FormBuilder) { }
+
+  totalPrice : number = 0 ;
+  totalQuantity : number = 0 ;
+
+  checkoutFormGroup !: FormGroup;
+  constructor(private formBuilder: FormBuilder) { }
 
   ngOnInit(): void {
     this.checkoutFormGroup = this.formBuilder.group(
       {
-        customer : this.formBuilder.group({
-          firstName : [''],
-          lastName : [''],
-          email : ['']
+        customer: this.formBuilder.group({
+          firstName: [''],
+          lastName: [''],
+          email: ['']
+        }),
+        shippingAddress: this.formBuilder.group({
+          street: [''],
+          city: [''],
+          state: [''],
+          country: [''],
+          zipCode: ['']
+
+        }),
+        billingAddress: this.formBuilder.group({
+          street: [''],
+          city: [''],
+          state: [''],
+          country: [''],
+          zipCode: ['']
+
+        }),
+        creditCard: this.formBuilder.group({
+          cardType: [''],
+          nameOnCard: [''],
+          cardNumber: [''],
+          securityCode: [''],
+          expirationMonth: [''],
+          expirationYear: ['']
         })
       });
   }
 
-  onSubmit(){
+  onSubmit() {
     console.log(this.checkoutFormGroup.get('customer')?.value);
+  }
+
+  copyShippingAddressToBillingAddress(event: Event) {
+    const target = event.target as HTMLInputElement
+    if (target && target.checked !== undefined) {
+      if (target.checked) {
+        this.checkoutFormGroup.controls['billingAddress'].setValue(this.checkoutFormGroup.controls['shippingAddress'].value);
+      }
+      else {
+        this.checkoutFormGroup.controls['billingAddress'].reset();
+      }
+    }
   }
 }
